@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <title>인스타 뷰어 | 로그인 없이 공개 게시물 보기</title>
+  <style>
+    :root { color-scheme: light; --ink:#202124; --muted:#6b7280; --line:#e5e7eb; --bg:#f7f7f8; --accent:#5b43d6; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; color:var(--ink); background:var(--bg); }
+    .wrap { width:min(760px,100%); margin:0 auto; padding:28px 16px 48px; }
+    header { padding:8px 0 22px; }
+    .brand { display:flex; align-items:center; gap:10px; font-weight:800; font-size:22px; letter-spacing:-.5px; }
+    .logo { display:grid; place-items:center; width:42px; height:42px; border-radius:14px; background:#eeeaff; color:var(--accent); font-size:22px; }
+    .subtitle { color:var(--muted); margin:8px 0 0; line-height:1.6; font-size:14px; }
+    .card { background:white; border:1px solid var(--line); border-radius:18px; padding:20px; margin:14px 0; box-shadow:0 4px 18px rgba(20,20,40,.035); }
+    .tabs { display:flex; gap:8px; padding:4px; border-radius:12px; background:#f1f1f4; margin-bottom:18px; }
+    .tab { flex:1; border:0; background:transparent; color:#62636a; padding:11px 8px; border-radius:9px; font-weight:700; cursor:pointer; font-size:14px; }
+    .tab[aria-selected="true"] { background:white; color:var(--ink); box-shadow:0 1px 4px #00000012; }
+    label { display:block; font-size:14px; font-weight:700; margin-bottom:8px; }
+    .row { display:flex; gap:8px; }
+    input { min-width:0; flex:1; width:100%; border:1px solid #d5d7dc; border-radius:11px; padding:13px 14px; font:inherit; outline:none; background:white; }
+    input:focus { border-color:var(--accent); box-shadow:0 0 0 3px #5b43d61a; }
+    button.primary { border:0; border-radius:11px; padding:0 18px; background:var(--accent); color:white; font-weight:750; cursor:pointer; font:inherit; white-space:nowrap; }
+    button.primary:hover { filter:brightness(.96); }
+    .help { color:var(--muted); font-size:12px; line-height:1.6; margin:9px 0 0; }
+    .notice { border-radius:12px; padding:12px 14px; font-size:13px; line-height:1.65; background:#f4f2ff; color:#44349c; margin-top:14px; }
+    .status { font-size:14px; line-height:1.65; color:#45464b; margin:0 0 12px; overflow-wrap:anywhere; }
+    .embed-wrap { display:flex; justify-content:center; width:100%; overflow:hidden; }
+    .embed-wrap blockquote { margin:0 auto !important; }
+    .hidden { display:none !important; }
+    .result-link { display:inline-flex; margin-top:12px; padding:10px 13px; border:1px solid var(--line); border-radius:10px; color:var(--ink); text-decoration:none; font-size:14px; font-weight:650; }
+    .result-link:hover { background:#f8f8fa; }
+    .section-title { margin:0 0 8px; font-size:17px; }
+    .small { color:var(--muted); font-size:13px; line-height:1.7; }
+    footer { color:#858791; text-align:center; font-size:12px; line-height:1.7; padding:18px 8px 0; }
+    @media(max-width:520px) {
+      .wrap { padding:18px 12px 32px; }
+      .card { padding:16px; border-radius:15px; }
+      .row { flex-direction:column; }
+      button.primary { padding:13px 16px; }
+      .brand { font-size:20px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <div class="brand"><span class="logo" aria-hidden="true">◎</span><span>인스타 뷰어</span></div>
+      <p class="subtitle">로그인 없이 공개 게시물 열람을 시도해 보세요.<br>공식 임베드로 표시할 수 있는 콘텐츠만 보여줍니다.</p>
+    </header>
+
+    <section class="card" aria-label="게시물 검색">
+      <div class="tabs" role="tablist" aria-label="검색 종류">
+        <button class="tab" id="postTab" role="tab" aria-selected="true" aria-controls="postPanel">게시물 URL</button>
+        <button class="tab" id="profileTab" role="tab" aria-selected="false" aria-controls="profilePanel">아이디 검색</button>
+      </div>
+
+      <div id="postPanel" role="tabpanel" aria-labelledby="postTab">
+        <form id="postForm">
+          <label for="postUrl">인스타그램 게시물 링크</label>
+          <div class="row">
+            <input id="postUrl" type="url" inputmode="url" placeholder="https://www.instagram.com/p/..." autocomplete="url" required>
+            <button class="primary" type="submit">게시물 보기</button>
+          </div>
+          <p class="help">게시물, 릴스, IGTV 링크를 지원합니다. 비공개 게시물은 표시할 수 없습니다.</p>
+        </form>
+      </div>
+
+      <div id="profilePanel" class="hidden" role="tabpanel" aria-labelledby="profileTab">
+        <form id="profileForm">
+          <label for="username">인스타그램 아이디</label>
+          <div class="row">
+            <input id="username" type="text" placeholder="예: instagram" autocapitalize="none" autocomplete="off" required>
+            <button class="primary" type="submit">검색 가능 여부 확인</button>
+          </div>
+          <p class="help">로그인 페이지로 자동 이동하지 않습니다. 이 정적 버전은 아이디만으로 게시물 목록을 직접 가져올 수 없습니다.</p>
+        </form>
+        <div id="profileResult" class="notice hidden" aria-live="polite"></div>
+        <div id="manualPostBox" class="hidden" style="margin-top:16px">
+          <form id="manualPostForm">
+            <label for="manualPostUrl">보고 싶은 게시물 URL</label>
+            <div class="row">
+              <input id="manualPostUrl" type="url" inputmode="url" placeholder="https://www.instagram.com/p/..." required>
+              <button class="primary" type="submit">사이트 안에서 보기</button>
+            </div>
+            <p class="help">아이디 검색으로 게시물 목록을 가져올 수 없는 경우, 게시물 링크를 붙여 넣어 공식 임베드로 표시할 수 있습니다.</p>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section id="output" class="card hidden" aria-live="polite">
+      <h2 class="section-title">게시물 결과</h2>
+      <p id="status" class="status"></p>
+      <div id="embed" class="embed-wrap"></div>
+      <a id="originalLink" class="result-link hidden" href="#" target="_blank" rel="noopener noreferrer">인스타그램 원문 열기 ↗</a>
+      <div id="fallback" class="notice hidden">임베드가 표시되지 않으면 게시물이 삭제되었거나, 비공개이거나, 임베드가 제한되었을 수 있습니다. 이 사이트가 제한을 우회할 수는 없습니다.</div>
+    </section>
+
+    <section class="card">
+      <h2 class="section-title">이용 안내</h2>
+      <p class="small">• 게시물 표시는 Instagram의 공식 임베드 기능에 의존합니다.<br>
+      • 모든 공개 게시물이 표시되는 것은 아닙니다. 로그인 요청, 오류 또는 빈 화면이 나타날 수 있습니다.<br>
+      • 아이디 검색은 로그인 페이지로 자동 이동하지 않으며, 현재는 검색 가능 여부와 수동 게시물 URL 입력을 안내합니다. 계정의 게시물 목록을 자동 검색하지 않습니다.<br>
+      • 게시물의 사진이나 동영상 파일을 이 사이트에 저장하지 않습니다.</p>
+    </section>
+
+    <footer>비공식 열람 도구 예시입니다. Instagram 및 Meta와 제휴하거나 공식적으로 보증받은 서비스가 아닙니다.<br>Instagram의 이용약관과 콘텐츠 권리를 존중해 주세요.</footer>
+  </main>
+
+  <script>
+    const postTab = document.getElementById('postTab');
+    const profileTab = document.getElementById('profileTab');
+    const postPanel = document.getElementById('postPanel');
+    const profilePanel = document.getElementById('profilePanel');
+    const output = document.getElementById('output');
+    const statusEl = document.getElementById('status');
+    const embed = document.getElementById('embed');
+    const originalLink = document.getElementById('originalLink');
+    const fallback = document.getElementById('fallback');
+
+    function setTab(which) {
+      const isPost = which === 'post';
+      postTab.setAttribute('aria-selected', String(isPost));
+      profileTab.setAttribute('aria-selected', String(!isPost));
+      postPanel.classList.toggle('hidden', !isPost);
+      profilePanel.classList.toggle('hidden', isPost);
+      output.classList.add('hidden');
+    }
+    postTab.addEventListener('click', () => setTab('post'));
+    profileTab.addEventListener('click', () => setTab('profile'));
+
+    function normalizeInstagramPost(raw) {
+      let u;
+      try { u = new URL(raw.trim()); } catch { return null; }
+      const host = u.hostname.toLowerCase().replace(/^www\./, '');
+      if (!['instagram.com', 'm.instagram.com'].includes(host) || u.protocol !== 'https:') return null;
+      const match = u.pathname.match(/^\/(p|reel|tv)\/([A-Za-z0-9_-]+)\/?/);
+      if (!match) return null;
+      return `https://www.instagram.com/${match[1]}/${match[2]}/`;
+    }
+
+    function showOutput() {
+      output.classList.remove('hidden');
+      embed.replaceChildren();
+      fallback.classList.add('hidden');
+      originalLink.classList.add('hidden');
+    }
+
+    document.getElementById('postForm').addEventListener('submit', (event) => {
+      event.preventDefault();
+      const input = document.getElementById('postUrl').value;
+      const canonical = normalizeInstagramPost(input);
+      showOutput();
+      if (!canonical) {
+        statusEl.textContent = '올바른 공개 게시물, 릴스 또는 IGTV URL을 입력해 주세요. 예: https://www.instagram.com/p/게시물ID/';
+        fallback.classList.remove('hidden');
+        return;
+      }
+      statusEl.textContent = '공식 임베드를 불러오는 중입니다. 표시되지 않는 게시물도 있을 수 있습니다.';
+      originalLink.href = canonical;
+      originalLink.classList.remove('hidden');
+
+      const quote = document.createElement('blockquote');
+      quote.className = 'instagram-media';
+      // 공식 임베드에서 캡션 표시를 요청하는 속성
+      quote.setAttribute('data-instgrm-captioned', '');
+      quote.setAttribute('data-instgrm-permalink', canonical);
+      quote.setAttribute('data-instgrm-version', '14');
+      quote.style.cssText = 'background:#fff;border:0;border-radius:3px;box-shadow:0 0 1px 0 rgba(0,0,0,.5),0 1px 10px 0 rgba(0,0,0,.15);margin:1px;max-width:540px;min-width:280px;padding:0;width:calc(100% - 2px);';
+      const inner = document.createElement('div');
+      inner.style.padding = '16px';
+      const link = document.createElement('a');
+      link.href = canonical;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.textContent = 'Instagram에서 게시물 보기';
+      inner.appendChild(link);
+      quote.appendChild(inner);
+      embed.appendChild(quote);
+
+      let script = document.getElementById('instagram-embed-script');
+      if (!script) {
+        script = document.createElement('script');
+        script.id = 'instagram-embed-script';
+        script.async = true;
+        script.src = 'https://www.instagram.com/embed.js';
+        script.onload = () => {
+          if (window.instgrm && window.instgrm.Embeds) window.instgrm.Embeds.process();
+        };
+        document.body.appendChild(script);
+      } else if (window.instgrm && window.instgrm.Embeds) {
+        window.instgrm.Embeds.process();
+      }
+
+      window.setTimeout(() => {
+        if (!embed.querySelector('iframe')) {
+          statusEl.textContent = '임베드가 표시되지 않았습니다. 원문 링크로 확인해 주세요.';
+          fallback.classList.remove('hidden');
+        } else {
+          statusEl.textContent = '아래에 공식 임베드가 표시됩니다. 캡션과 미디어는 Instagram에서 제공하는 내용에 따라 달라질 수 있습니다.';
+        }
+      }, 5000);
+    });
+
+    document.getElementById('profileForm').addEventListener('submit', (event) => {
+      event.preventDefault();
+      const raw = document.getElementById('username').value.trim().replace(/^@/, '');
+      const result = document.getElementById('profileResult');
+      const manualBox = document.getElementById('manualPostBox');
+      output.classList.add('hidden');
+      result.classList.remove('hidden');
+      manualBox.classList.add('hidden');
+
+      if (!/^[A-Za-z0-9._]{1,30}$/.test(raw)) {
+        result.textContent = '아이디 형식을 확인해 주세요. 영문자, 숫자, 마침표, 밑줄을 사용할 수 있습니다.';
+        return;
+      }
+
+      result.replaceChildren();
+      const heading = document.createElement('strong');
+      heading.textContent = `@${raw} 검색 안내`;
+      const explanation = document.createElement('p');
+      explanation.style.margin = '8px 0';
+      explanation.textContent = '이 파일은 서버나 Meta API 인증 구성이 없는 정적 웹페이지라서 해당 계정의 게시물 목록을 자동으로 검색할 수 없습니다. 로그인 페이지로 이동하지 않도록 동작을 변경했습니다.';
+      const nextStep = document.createElement('p');
+      nextStep.style.margin = '8px 0 0';
+      nextStep.textContent = '보고 싶은 게시물의 링크를 알고 있다면 아래에 붙여 넣어 이 사이트 안에서 공식 임베드 표시를 시도해 보세요.';
+      result.append(heading, explanation, nextStep);
+      manualBox.classList.remove('hidden');
+    });
+
+    document.getElementById('manualPostForm').addEventListener('submit', (event) => {
+      event.preventDefault();
+      const input = document.getElementById('manualPostUrl').value;
+      document.getElementById('postUrl').value = input;
+      setTab('post');
+      document.getElementById('postForm').requestSubmit();
+    });
+  </script>
+</body>
+</html>
